@@ -1,10 +1,24 @@
 require 'sqlite3'
+require 'byebug'
 
 module Database
   class InvalidAttributeError < StandardError;end
   class NotConnectedError < StandardError;end
 
   class Model
+    def initialize(attributes = {})
+      attributes.symbolize_keys!
+      raise_error_if_invalid_attribute!(attributes.keys)
+
+      @attributes = {}
+
+      self.class.attribute_names.each do |name|
+        @attributes[name] = attributes[name]
+      end
+
+      @old_attributes = @attributes.dup
+    end
+
     def self.inherited(klass)
     end
 
@@ -35,6 +49,32 @@ module Database
 
     def self.attribute_names=(attribute_names)
       @attribute_names = attribute_names
+    end
+
+    def [](attribute)
+      raise_error_if_invalid_attribute!(attribute)
+
+      @attributes[attribute]
+    end
+
+    def []=(attribute, value)
+      raise_error_if_invalid_attribute!(attribute)
+
+      @attributes[attribute] = value
+    end
+
+
+    def save
+      if new_record?
+        results = insert!
+      else
+        results = update!
+      end
+
+      # When we save, remove changes between new and old attributes
+      @old_attributes = @attributes.dup
+
+      results
     end
 
     # Input looks like, e.g.,
@@ -75,6 +115,8 @@ module Database
     def valid_attribute?(attribute)
       self.class.attribute_names.include? attribute
     end
+
+
 
     private
     def self.prepare_value(value)

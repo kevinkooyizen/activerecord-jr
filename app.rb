@@ -1,8 +1,8 @@
 require 'pathname'
 require 'sqlite3'
+require 'byebug'
 
 APP_ROOT = Pathname.new(File.dirname(File.expand_path(__FILE__)))
-
 # This converts a Hash with Strings as keys to a Hash with symbols as keys
 # If a key doesn't response to to_sym, do nothing
 class Hash

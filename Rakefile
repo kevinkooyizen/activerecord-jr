@@ -1,4 +1,5 @@
 require 'faker'
+require 'byebug'
 
 task :console do
   exec "irb -r./app.rb"
@@ -13,7 +14,7 @@ namespace :db do
       Cohort.create(:name => name)[:id]
     end
 
-    2000.times do
+    20.times do
       Student.create :first_name => Faker::Name.first_name,
                      :last_name  => Faker::Name.last_name,
                      :email      => Faker::Internet.email,
